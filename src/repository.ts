@@ -28,5 +28,9 @@ export class Repository<T extends { id: number }> {
   }
 }
 
-export class WizardRepository extends Repository<Wizard> {}
+export class WizardRepository extends Repository<Wizard> {
+    findByHouse(house: Wizard["house"]): Wizard[] {
+    return this.getAll().filter(wizard => wizard.house === house);
+  }
+}
 export class SpellRepository extends Repository<Spell> {}

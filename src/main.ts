@@ -78,10 +78,9 @@ class AcademyService {
     return `${wizard.name} casts ${spell.name}!`;
   }
 
-  findByHouse(house: House): WizardSummary[] {
+    findByHouse(house: House): WizardSummary[] {
     return this.wizards
-      .getAll()
-      .filter(wizard => wizard.house === house)
+      .findByHouse(house)
       .map(({ id, name, house }) => ({ id, name, house }));
   }
 
@@ -161,6 +160,14 @@ try {
 } catch (error) {
   console.log("Expected error:", (error as Error).message);
 }
+
+console.log("\n--- Repository: find by house ---");
+console.log(wizards.findByHouse("Gryffindor")); 
+console.log(wizards.findByHouse("Slytherin"));  
+console.log(wizards.findByHouse("Ravenclaw")); 
+
+// @ts-expect-error "Durmstrang" is not a valid House
+wizards.findByHouse("Durmstrang");
 
 console.log("\n--- Cast a spell ---");
 console.log(academy.castSpell(1, 101));
