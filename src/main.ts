@@ -1,5 +1,6 @@
 import {
   type Wizard,
+  type NewWizard,
   type Spell,
   type AcademyEvent,
   type House,
@@ -15,6 +16,7 @@ import {
 
 import { WizardRepository, SpellRepository } from "./repository";
 import { Log } from "./decorators";
+
 
 function isHouse(value: unknown): value is House {
   return (
@@ -47,6 +49,22 @@ class AcademyService {
     private readonly wizards: WizardRepository,
     private readonly spells: SpellRepository
   ) {}
+
+  registerWizard(data: NewWizard): Wizard {
+    const candidate = { ...data, id: this.nextWizardId() };
+
+    if (!isWizard(candidate)) {
+      throw new Error("Invalid wizard data");
+    }
+
+    this.wizards.add(candidate);
+    return candidate;
+  }
+
+  private nextWizardId(): number {
+    const ids = this.wizards.getAll().map(wizard => wizard.id);
+    return ids.length === 0 ? 1 : Math.max(...ids) + 1;
+  }
 
   @Log
   castSpell(wizardId: number, spellId: number): string {
@@ -122,6 +140,27 @@ spells.add({
 });
 
 const academy = new AcademyService(wizards, spells);
+
+console.log("\n--- Register a new wizard ---");
+const ron = academy.registerWizard({
+  name: "Ron Weasley",
+  house: "Gryffindor",
+  level: 4,
+  active: true
+});
+console.log(ron);
+
+console.log("\n--- Register an invalid wizard ---");
+try {
+  academy.registerWizard({
+    name: "Viktor Krum",
+    house: "Durmstrang", // not a valid House
+    level: 7,
+    active: true
+  });
+} catch (error) {
+  console.log("Expected error:", (error as Error).message);
+}
 
 console.log("\n--- Cast a spell ---");
 console.log(academy.castSpell(1, 101));
