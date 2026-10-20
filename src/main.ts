@@ -12,6 +12,7 @@ import {
   type WizardUpdate,
   type AttackSpell,
   type NonHealingCategory,
+  type SpellCastEvent,
 } from "./types";
 
 import { WizardRepository, SpellRepository } from "./repository";
@@ -42,6 +43,10 @@ function isWizard(value: unknown): value is Wizard {
     typeof candidate.level === "number" &&
     typeof candidate.active === "boolean"
   );
+}
+
+function handleSpellCast(event: SpellCastEvent): void {
+  console.log(`Wizard ${event.wizardId} cast ${event.spellName}`);
 }
 
 class AcademyService {
@@ -88,10 +93,9 @@ class AcademyService {
     return this.wizards.update(id, changes);
   }
 
-  getSpellEvents(events: AcademyEvent[]): Extract<AcademyEvent, { type: "spell-cast" }>[] {
+  getSpellEvents(events: AcademyEvent[]): SpellCastEvent[] {
     return events.filter(
-      (event): event is Extract<AcademyEvent, { type: "spell-cast" }> =>
-        event.type === "spell-cast"
+      (event): event is SpellCastEvent => event.type === "spell-cast"
     );
   }
 }
@@ -201,6 +205,23 @@ const events: AcademyEvent[] = [
   { type: "wizard-expelled", wizardId: 3 }
 ];
 console.log(academy.getSpellEvents(events));
+
+console.log("\n--- Handle a spell-cast event ---");
+handleSpellCast({
+  type: "spell-cast",
+  wizardId: 1,
+  spellName: "Expelliarmus"
+});
+
+// TypeScript still verifies that the invalid events below are rejected.
+function compileTimeChecks(): void {
+  // @ts-expect-error a level-up event is not a SpellCastEvent
+  handleSpellCast({ type: "level-up", wizardId: 2, newLevel: 9 });
+
+  // @ts-expect-error a wizard-expelled event is not a SpellCastEvent
+  handleSpellCast({ type: "wizard-expelled", wizardId: 3 });
+}
+void compileTimeChecks;
 
 // Compile-time demonstrations: these aliases are checked by TypeScript.
 type CastArguments = Parameters<AcademyService["castSpell"]>;
