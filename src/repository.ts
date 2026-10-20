@@ -1,5 +1,6 @@
 import type { Wizard, Spell } from "./types";
 import { Log, MeasureTime } from "./decorators";
+import { ValidateSpellPower } from "./decorators";
 
 export class Repository<T extends { id: number }> {
   private items: T[] = [];
@@ -33,4 +34,10 @@ export class WizardRepository extends Repository<Wizard> {
     return this.getAll().filter(wizard => wizard.house === house);
   }
 }
-export class SpellRepository extends Repository<Spell> {}
+
+export class SpellRepository extends Repository<Spell> {
+  @ValidateSpellPower
+  override add(spell: Spell): void {
+    super.add(spell);
+  }
+}

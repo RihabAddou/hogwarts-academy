@@ -213,6 +213,28 @@ handleSpellCast({
   spellName: "Expelliarmus"
 });
 
+console.log("\n--- Validate spell power ---");
+
+spells.add({
+  id: 104,
+  name: "Reparo",
+  category: "defense",
+  power: 50
+});
+console.log("Valid spell added:", spells.findById(104));
+
+try {
+  spells.add({
+    id: 103,
+    name: "Invalid Spell",
+    category: "attack",
+    power: -10
+  });
+} catch (error) {
+  console.log("Expected error:", (error as Error).message);
+}
+
+console.log("Invalid spell stored?", spells.findById(103)); // undefined
 // TypeScript still verifies that the invalid events below are rejected.
 function compileTimeChecks(): void {
   // @ts-expect-error a level-up event is not a SpellCastEvent
